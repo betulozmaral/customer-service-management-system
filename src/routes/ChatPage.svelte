@@ -4,14 +4,21 @@
 	import Tabs from "../shared/Tabs.svelte";
     import {Link, navigate} from 'svelte-navigator';
     import ChatStore from '../stores/ChatStore.js';
+    // import {db} from '../firebase.js';
 
-    //bu dışarıdan gelecek bana. 
+
+    //bu dışarıdan gelecek bana. şimdilik default değer bu. 
     export let representative = {
         name: "Sam",
         gender: "Male",
         id:123
     };
+    export let logout;
+    let message = "";
+    const query = db.collection("chats").orderBy("date", "desc");
+    const chats = collectionData(query, "id").pipe(startWith([]));
 
+    //representative'ın cinsiyetine göre resim değişecek.
     let src;
     if (representative.gender === "Female"){
         src = "../images/customer-service-agent.png"
@@ -23,14 +30,6 @@
         src = "../images/customer-service-neutral.png";
     }
 
-    let text="";
-    let repChat = {
-        repName: representative.name,
-        repId: representative.id,
-        messageList: [{
-            message: "",
-            date: ""}]
-    };
 
     //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
 	let items = ["Open", "Completed"];
@@ -44,14 +43,16 @@
 		activeItem = event.detail;
 	};
 
-    function sendMessage(text){
+    function sendMessage(){
         //text'i MessageBubble'a gönder
-        repChat.messageList.push({message: text, date: ""});
-        MessageBubble.messageList.push(text);
-        MessageBubble.fromRepresentative = true;
-        MessageBubble.src = src;
-        text="";
-
+        db.collection("chats").add({
+            userId: representative.id,
+            message: message,
+            // messageId?
+            date: +new Date(),
+            fromRepresentative: true
+        });
+        message = "";
     }
 
     const handleChatBox = (id) =>{
@@ -155,20 +156,21 @@
                 <p class="platform">from platform</p>   
             </div>
             <div class="message-bubbles-wrapper">
-                <!-- müşteriden gelen mesajda src ye gerek yok.  -->
-                <!-- <MessageBubble messageList={.messages}/>  her yeni mesaj, ismi, ppsi, tarihi, mesaj bilgisiyle geliyor. -->
-            <!-- bu triggerlanarak gösterilmeli. yeni mesaj geldiğinde veya customer service yanıt gönderdiğinde
-            bu mesajlar yine bir yerde depolanacak. bir pencerede max şu kadar cm alan var, onu aşınca yukarı kaymalı. slider-->
                 <!-- temsilciden iletilen mesajda srcyi de göndeririz -->
-                <MessageBubble fromRepresentative = {true} messageList=repChat.messageList {src}/>
+                {#each $chats as chat }
+                    {#if representative.id === chat.uid}
+                        <MessageBubble fromRepresentative = {true} messageList={chat.message} {src}/>
+                {/if}
+                {/each}
             </div>
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
-                <input bind:value={text} type="text" placeholder="Type a message">
-                <div class="send-button">
+                <input bind:value={message} type="text" placeholder="Type a message">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="send-button" on:click={sendMessage}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
-                        fill="#7596e3"/>    <!--iconun rengini değiştirebilirsin.-->
+                        fill="#7596e3"/>   
                     </svg>
                         
                 </div>

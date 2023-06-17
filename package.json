@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "axios": "^0.21.4",
+    "date-picker-svelte": "^2.4.3",
     "svelte-navigator": "^3.2.2",
     "svelte-routing": "^1.8.9",
     "svelte-spa-router": "^3.3.0",

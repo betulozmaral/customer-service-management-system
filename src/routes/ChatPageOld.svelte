@@ -4,6 +4,12 @@
 	import Tabs from "../shared/Tabs.svelte";
     import {Link, navigate} from 'svelte-navigator';
     import ChatStore from '../stores/ChatStore.js';
+    import { DateInput } from 'date-picker-svelte';
+
+	
+	function datepicked (e) {
+		console.log(e.detail.datepicked)
+	}
 
 
     export let representative = {
@@ -78,16 +84,16 @@
 		activeItem = event.detail;
 	};
 
-    function sendMessage(text){
-        //text'i MessageBubble'a gönder
-        repChat.messageList.push({message: text, date: ""});
-        MessageBubble.messageList.push(text);
-        MessageBubble.fromRepresentative = true;
-        MessageBubble.src = src;
-        text="";
+    let dateStart = new Date();
+    let dateEnd = new Date();
+    let showCalendar = false;
+    const pickDate = () => {
+		showCalendar = true;
+	};
 
-    }
-
+    const navigateHome = () => {
+        showCalendar = false;
+    };
 
 
 </script>
@@ -103,7 +109,8 @@
                 <ul>
                     <li>
                         <Link to="/chats">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" on:click={navigateHome}>
                         <path d="M12 17.99V14.99M9.02 2.83999L3.63 7.03999C2.73 7.73999 2 9.22999 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.28999 21.19 7.73999 20.2 7.04999L14.02 2.71999C12.62 1.73999 10.37 1.78999 9.02 2.83999Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         </Link>
@@ -111,10 +118,13 @@
                     </li> 
                     
                     <li>
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <div class="calendar" on:click={pickDate}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M11.9949 13.7H12.0049M8.29395 13.7H8.30395M8.29395 16.7H8.30395" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                        </div>
                             
                     </li>
 
@@ -163,8 +173,17 @@
                 <p>Completed conversations</p>
             {/if}
         </div>
+
         <!--default olarak ilk chat, sonrasında chat listte hangi chate tıklandıysa o.-->
         <div class="chat-window"> <!--sağ sütun-->
+            {#if showCalendar===true}
+                <p>Başlangıç tarihi:</p>
+                <DateInput bind:value={dateStart}/>
+                <p>{dateStart}</p>
+                <p>Bitiş tarihi:</p>
+                <DateInput bind:value={dateEnd} />
+
+            {:else}
             <div class="chat-header">
                 <div class="profile-container">
                     <img src="../images/profile-icon-woman.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
@@ -183,7 +202,7 @@
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
                 <input bind:value={text} type="text" placeholder="Type a message">
-                <div class="send-button" on:click={sendMessage(text)}>
+                <div class="send-button">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
                         fill="#7596e3"/>    <!--iconun rengini değiştirebilirsin.-->
@@ -191,7 +210,7 @@
                         
                 </div>
             </div>
-            
+            {/if}
         </div>
     </main>
 
