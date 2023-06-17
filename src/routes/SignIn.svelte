@@ -11,7 +11,7 @@
 
     let errors = { username: "", password: "" };
     let valid = false;
-
+/*
     function validateForm() {
         valid = true;
         if (fields.username.trim() === "") {
@@ -32,19 +32,79 @@
             // Burada authentication yapılacak
             alert("Signed in");
             dispatch("signIn", { ...fields });
-            navigate('/chats');
+            //navigate('/chats');
         }
 
     }
-
+    */
+/*
     async function submitHandler(event) {
             event.preventDefault();
-            validateForm();
+            //validateForm();
             /* remember me box is checked
             if (status===true){
             }
-            */
+            
     }
+    */
+
+    import axios from 'axios';
+
+// Function to handle login request
+async function submitHandler(event) {
+    event.preventDefault();
+    try {
+    const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
+      email: 'representative4@hotmail.com',
+      password: 'representative123*'
+    });
+
+    // Handle the response data
+    const { access_token } = response.data;
+    localStorage.setItem('access_token', access_token);
+
+    console.log('Login successful');
+    // Further processing or updating state in your Svelte component
+    alert("Signed in");
+    navigate('/chats');
+    fetchConversations();
+
+
+  } catch (error) {
+    // Handle any error that occurs
+    console.error(error);
+    // Optionally show an error message to the user
+  }
+}
+
+// Function to fetch conversations from the endpoint
+async function fetchConversations() {
+  try {
+    const accessToken = localStorage.getItem('access_token');
+    const config = {
+      headers: {
+        Authorization: 'Bearer ${accessToken}'
+      }
+    };
+
+    const response = await axios.get('http://localhost:9090/representative/getallconversationsoftherepresentative', config);
+    // Handle the response data
+    console.log(response.data);
+  } catch (error) {
+    // Handle any error that occurs
+    console.error(error);
+    // Optionally show an error message to the user
+  }
+}
+
+// Call the fetchConversations function when needed
+
+
+
+
+
+
+
 </script>
 
 

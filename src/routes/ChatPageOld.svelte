@@ -5,6 +5,7 @@
     import {Link, navigate} from 'svelte-navigator';
     import ChatStore from '../stores/ChatStore.js';
     import { DateInput } from 'date-picker-svelte';
+    import axios from 'axios';
 
 	
 	function datepicked (e) {
@@ -61,6 +62,9 @@
         platform: "Telegram"
     }
     ];
+
+
+
 
     let repChat = {
         repName: representative.name,
@@ -163,9 +167,7 @@
                             {#if customer.messages.length > 0}
                             <!-- lastMessage = {customer.messages[customer.messages.length-1]}; -->
                             <!-- aynı customer id'sine sahip mesajlar farklı boxlarda görünmemeli. storeda mı saklıyoruz? poll oluşturmaya bak.  -->
-                                <ChatBox customerName={customer.customerName} 
-                                date={customer.date} 
-                                messages={customer.messages}/>
+                                <!-- <ChatBox customerName={customer.customerName} date={customer.date}  messages={customer.messages}/> -->
                             {/if}
                         {/each}
                 </div>
@@ -193,11 +195,11 @@
             </div>
             <div class="message-bubbles-wrapper">
                 <!-- müşteriden gelen mesajda src ye gerek yok.  -->
-                <MessageBubble messageList={customerChat[0].messages}/>  <!--her yeni mesaj, ismi, ppsi, tarihi, mesaj bilgisiyle geliyor.-->
+                <!-- <MessageBubble messageList={customerChat[0].messages}/>  her yeni mesaj, ismi, ppsi, tarihi, mesaj bilgisiyle geliyor. -->
             <!-- bu triggerlanarak gösterilmeli. yeni mesaj geldiğinde veya customer service yanıt gönderdiğinde
             bu mesajlar yine bir yerde depolanacak. bir pencerede max şu kadar cm alan var, onu aşınca yukarı kaymalı. slider-->
                 <!-- temsilciden iletilen mesajda srcyi de göndeririz -->
-                <MessageBubble fromRepresentative = {true} messageList=repChat.messageList {src}/>
+                <!-- <MessageBubble fromRepresentative = {true} messageList=repChat.messageList {src}/> -->
             </div>
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
