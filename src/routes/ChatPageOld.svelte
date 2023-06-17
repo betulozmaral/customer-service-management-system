@@ -105,7 +105,7 @@
 <!-- bu elementlerin oturduğu beyaz pencere -->
 <div class="wrapper">   
     <header>
-        <Link to="/chats">
+        <Link to="/">
         <img src="../images/logo-no-background.png" alt="Orion logo" height="50px" width="auto"/>
         </Link>
         <nav class ="navbar">

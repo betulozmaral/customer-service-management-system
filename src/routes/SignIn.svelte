@@ -2,12 +2,11 @@
     import { createEventDispatcher } from "svelte";
     import {Link, navigate} from 'svelte-navigator';
     let dispatch = createEventDispatcher();
+    import {push} from 'svelte-spa-router';
+    import {onMount} from 'svelte';
 
-    let fields = {
-        username: "",
-        password: "",
-        status: false,
-    };
+    let email = "", password = "";
+    let status = false;
 
     let errors = { username: "", password: "" };
     let valid = false;
@@ -50,9 +49,27 @@
 
     import axios from 'axios';
 
+/*
+$: submitHandler = async () => {
+        const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
+            email:'representative4@hotmail.com',
+            password: 'representative123*'
+        }, {withCredentials: true}  //backendden cookies almak için
+        );
+        if(response.status === 200){
+            console.log("Login successful");
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token;        
+            navigate('/chats');
+        }
+        else{
+            console.log("Login failed");
+        }
+}
+*/
+
+  
 // Function to handle login request
 async function submitHandler(event) {
-    event.preventDefault();
     try {
     const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
       email: 'representative4@hotmail.com',
@@ -60,12 +77,12 @@ async function submitHandler(event) {
     });
 
     // Handle the response data
-    const { access_token } = response.data;
-    localStorage.setItem('access_token', access_token);
+     const { access_token } = response.data;
+     localStorage.setItem('access_token', access_token);
 
     console.log('Login successful');
     // Further processing or updating state in your Svelte component
-    alert("Signed in");
+    // await push('/chats');
     navigate('/chats');
     fetchConversations();
 
@@ -76,6 +93,8 @@ async function submitHandler(event) {
     // Optionally show an error message to the user
   }
 }
+
+
 
 // Function to fetch conversations from the endpoint
 async function fetchConversations() {
@@ -97,13 +116,17 @@ async function fetchConversations() {
   }
 }
 
-// Call the fetchConversations function when needed
 
 
-
-
-
-
+/*
+onMount(async () => {
+    const response = await axios.get('http://localhost:9090/representative/getallconversationsoftherepresentative');
+    if(response.status === 200){
+    }
+    // Handle the response data
+    console.log(response.data);
+});
+*/
 
 </script>
 
@@ -127,7 +150,7 @@ async function fetchConversations() {
                         <form on:submit|preventDefault={submitHandler}>
                             <div class="form-field">
                                 <label for="username">Username</label>
-                                <input type="text" id="username" bind:value={fields.username} />
+                                <input type="text" id="username" bind:value={email} />
                                 <div class="error">{errors.username}</div>
                             </div>
                             <div class="form-field">
@@ -135,7 +158,7 @@ async function fetchConversations() {
                                 <input
                                     type="password"
                                     id="password"
-                                    bind:value={fields.password}
+                                    bind:value={password}
                                 />
                                 <div class="error">{errors.password}</div>
                             </div>
@@ -143,7 +166,7 @@ async function fetchConversations() {
                                 <input
                                     type="checkbox"
                                     id="remember"
-                                    bind:value={fields.status}
+                                    bind:value={status}
                                 />
                                 <label for="remember">Remember me</label>
                             </div>
