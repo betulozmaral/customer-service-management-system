@@ -1,168 +1,237 @@
 <script>
-/* login logic here */
+    import { createEventDispatcher } from "svelte";
+    import {Link, navigate} from 'svelte-navigator';
+    let dispatch = createEventDispatcher();
 
-  import { Router, Link, Route } from 'svelte-navigator';
+    let fields = {
+        username: "",
+        password: "",
+        status: false,
+    };
 
+    let errors = { username: "", password: "" };
+    let valid = false;
 
-  let username = '';
-  let password = '';
-  let status = false;
+    function validateForm() {
+        valid = true;
+        if (fields.username.trim() === "") {
+            errors.username = "Username is required";
+            valid = false;
+        } else {
+            errors.username = "";
+        }
 
-  async function handleSubmit() {
-    event.preventDefault();
+        if (fields.password === "") {
+            errors.password = "Password is required";
+            valid = false;
+        } else {
+            errors.password = "";
+        }
 
-    // Perform sign-in logic here
-    console.log('Sign-in form submitted');
-    console.log('Username:', username);
-    console.log('Password:', password);    
-    console.log('Remember me:', status);
-  }
+        if (valid) {
+            // Burada authentication yapılacak
+            alert("Signed in");
+            dispatch("signIn", { ...fields });
+            navigate('/chats');
+        }
 
+    }
 
-
-
-
+    async function submitHandler(event) {
+            event.preventDefault();
+            validateForm();
+            /* remember me box is checked
+            if (status===true){
+            }
+            */
+    }
 </script>
 
 
-
-
-
-
 <div class="wrapper">
-  <!-- Logoya tıklayınca ana sayfaya yönlendir-->
-  <Link to="/" class="logo"><img src="src\assets\logo-gray-no-background.png" alt="Orion logo" height="50px" width="auto"></Link>
-
-
-
-  <main>
-    <div class="left-col">
-      <div class="sign-in">
-        <h2>Welcome!</h2>
-        <h1>Sign in</h1>
-        <p class="slogan">Manage customer feedback simply</p>
-
-        <div class="form-area">
-        <form on:submit={handleSubmit}>
-          <!-- Your login form fields -->
-          <div class="user-name">
-            <label for="uname">User name</label>
-            <input type="text" id="uname" bind:value={username} placeholder="Enter your user name" required/>
-          </div>
-          <div class="password">
-            <label for="pswrd">Password</label>
-            <input type="password" id="pswrd" bind:value={password} placeholder="Enter your password" required />
-            <span class="show-password"></span>
-          </div>
-          <div class="remember-me">
-            <input type="checkbox" id="remember" bind:value={status} />
-            <label for="remember">Remember me</label>
-          </div>
-          <button type="submit">Login</button>
-        </form>
+    <main>
+        <Link to="/"><img
+            src="../images/logo-no-background.png"
+            alt="Orion logo"
+            height="50px"
+            width="auto"
+        /></Link>
+        <div class="container">
+            <div class="left-col">
+                <!-- Buraya form kutucuğu gelecek -->
+                <div class="column-box">
+                    <h2>Welcome!</h2>
+                    <h1>Sign in</h1>
+                    <p class="slogan">Manage customer feedback simply</p>
+                    <div class="form-area">
+                        <form on:submit|preventDefault={submitHandler}>
+                            <div class="form-field">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" bind:value={fields.username} />
+                                <div class="error">{errors.username}</div>
+                            </div>
+                            <div class="form-field">
+                                <label for="password">Password</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    bind:value={fields.password}
+                                />
+                                <div class="error">{errors.password}</div>
+                            </div>
+                            <div class="remember-me">
+                                <input
+                                    type="checkbox"
+                                    id="remember"
+                                    bind:value={fields.status}
+                                />
+                                <label for="remember">Remember me</label>
+                            </div>
+                            <button type="submit">Login</button>
+                        </form>
+                    </div>
+                
+                    <div class="register-link">
+                        Don't have an account?
+                        <!-- <Link to="/signup"><strong>Register</strong></Link> -->
+                        <!-- Üstüne tıklayınca bir işlem mi gerçekleştirmeli? handler fonk lazım olabilir
+                        ayrı sayfalar değiller çünkü. -->
+                        <Link to="/signup">
+                        <strong>Register here</strong>
+                        </Link>
+                    </div>
+                </div>
+                <!-- default olarak login. registera basılırsa register. -->
+            </div>
+            <div class="right-col">
+                <!-- iki sütun olsun. illüstrasyon sağa yerleşsin. -->
+                <img
+                    src="../images/login-illustration.svg"
+                    alt="Customer Service Representative Illustration"
+                    width="400px"
+                    height="auto"
+                />
+            </div>
         </div>
-
-        <p class="register-btn">
-          Don't have an account? 
-          <Link class="register" to="/signup">
-            <strong>Register</strong>
-          </Link>
-        </p>
-
-      </div>
-    </div>
-
-    <div class="right-col">
-      <img src="src\assets\Rectangle.svg" alt="Customer Service Representative illustration">
-    </div>
-  </main>
+    </main>
 </div>
 
 
 
+
+
+
 <style>
-  :root {
-    font-size: 62.5%;
-    font-family: 'Poppins';
-    margin: 0;
-    background: linear-gradient(to bottom right, #a6c0fe, #f68080);
-    height: 100vh;
 
-  }
-  .wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+/* main kullanılabilir miydi bunun yerine */
+.wrapper {
+        max-width: 1200px;
+        margin: 20px auto;
+    }
 
-  main {
-    display: flex;
-    gap: 15.6em;
-    margin-top: 1.4em;
+    /* Şu an nesneler iki sütunlu. nesneleri ortala*/
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        /* margin: 20px auto; */
+        gap: 20px; /*iki sütun arasında ne kadar boşluk olsun istiyorsan.*/
+    }
+    /* eşit boyutta divler.  */
+    .left-col,.right-col {
+        width: 50%;
+        height: 600px; /*ekran boyutu kadar yapabilirim ileride. */
+    }
+
     
-  }
-  .left-col {
-    
+    /* resmi ortala div içerisinde  */
+    .right-col {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /*text-align: center; /*bu yatay olarak ortaladı. */
+    }
+    .right-col img{
+        border-radius: 10px;
+    }
+.column-box{
+    width: 500px;
+    height: 550px;
+    text-align: left;
+    margin: 40px auto;
     border: 1px solid #878787;
     box-sizing: border-box;
-    width: 505px;
-    height: 701px;
-    left: 111px;
-    top: 114px;
     box-shadow: 0px 4px 64px rgba(0, 0, 0, 0.05);
     border-radius: 10px;
-}
-
-.sign-in {
-    padding: 3.5em 4em;
+    padding: 20px 20px;
 }
 
 /* welcome */
 h2 {
-    font-size: 2.5rem;
+    font-size: 25px;
     font-weight: 300;
     margin: 0;
-
 }
 
 /* Sign in */
 h1 {
-    font-size: 3.1rem;
+    font-size: 31px;
     font-weight: 500;
-    margin: 0.7em 0;
+    margin: 7px 0;
     position: relative;
 }
 
 .slogan{
-    font-size: 1.6rem;
+    font-size: 16px;
     font-weight: 400;
     position: absolute;
-    margin-top:  -1.5em;
+    margin-top:  -15px;
 }
 
 .form-area {
-    margin-top: 7em;
+    margin: 50px 0;
+    position: relative;
 }
 
-.user-name, .password {
-    font-size: 1.6rem;
+.form-field {
+    margin-top: 20px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 300;
+}
+
+.register-link{
+    font-size: 16px;
+    font-weight: 300;
+    margin: 20px 0;
+    text-align: center;
+}
+
+button {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-size: 16px;
     font-weight: 400;
+    background: #f68080;
+    color: white;
+    cursor: pointer;
+    margin:  20px 0; 
 }
-.user-name{
-  margin-bottom: 2em;
-}
-
-.user-name label, .password label {
-    display: block;
-    margin-bottom: 0.5em;
-}
-
 input[type=text], input[type=password] {
     width: 100%;
-    padding: 1.2em 1.5em;
+    padding: 12px 15px;
     border: 1px solid #878787;
     box-sizing: border-box;
     border-radius: 6px;
-    font-size: 1.6rem;
+    font-size: 16px;
     font-weight: 400;
 }
 
@@ -170,58 +239,28 @@ input[type=checkbox] {
   box-sizing: border-box;
   width: 15px;
   height: 15px;
-  margin-right: 0.4em;
+  margin-right: 4px;
+  margin-top: 5px;
 }
 
-.remember-me {
-    display: flex;
-    align-items: center;
-    margin-top: 1em;
-    font-size: 1.3rem;
-    font-weight: 300;
-}
-
-button {
-    width: 100%;
-    padding: 1.2em 1.5em;
-    border: none;
-    box-sizing: border-box;
-    border-radius: 6px;
-    font-size: 1.6rem;
+.error{
     font-weight: 400;
-    background: #f68080;
-    color: white;
-    cursor: pointer;
-    margin-top: 2em;
-}
+    font-size: 12px;
+    color: #d91e18;
 
-.register-btn {
-  text-decoration: none;
-  color: black;
-    font-size: 1.6rem;
-    font-weight: 300;
-    margin-top: 3.5em;
-    text-align: center;
-    
-}
-
-
-.right-col img{
-  border-radius: 10px;
-
-}
-
-.right-col {
-  margin-left: auto;
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-/*logo*/
-.wrapper img {
-  margin-top: 3em;
-  margin-left: -220px;
-  
 }
 
 </style>
+
+<!-- responsive tasarım. css kısmına geri dönülecek.
+hata mesajı yazılınca register linki aşağıya kayıyor, inputlar aşağı kayıyor. 
+butonun konumlandırması boxa göre olmalı vs. 
+neden tam ekran olmuyor? alttaki minik boşluk ne, nasıl gider
+em unit yerine px kullanırsak ne olur 
+position relative ve absolute nasıl kullanılıyordu
+Sign in ve Sİgn up farklı sayfalar mı olmalı yoksa aynı sayfaya farklı objeler olarak import edilip
+if-else yapısıyla mı gösterilmeli?
+register handler yazıalbilir belki. 
+net ninja add new poll ve poll list şeklinde iki nesne yapmıştı aynı sayfada. 
+tıklayınca diğerine geçiyordu, active item şeklinde bir değişke ile yapmıştı. Araştır. 
+kod tekrarlamamak için. -->
