@@ -69,52 +69,49 @@ $: submitHandler = async () => {
 
   
 // Function to handle login request
-async function submitHandler(event) {
-    try {
-    const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
-      email: 'representative4@hotmail.com',
-      password: 'representative123*'
-    });
+    async function submitHandler(event) {
+        try {
+            const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
+                email: 'representative3@hotmail.com',
+                password: 'representative123*'
+            });
 
-    // Handle the response data
-     const { access_token } = response.data;
-     localStorage.setItem('access_token', access_token);
+            // Handle the response data
+            const { access_token } = response.data;
+            localStorage.setItem('access_token', access_token);
 
-    console.log('Login successful');
-    // Further processing or updating state in your Svelte component
-    // await push('/chats');
-    navigate('/chats');
-    fetchConversations();
+            console.log('Login successful');
+            // Further processing or updating state in your Svelte component
+            navigate('/chats');
+            fetchConversations();
 
+        } catch (error) {
+            // Handle any error that occurs
+            console.error(error);
+            // Optionally show an error message to the user
+        }
+    }
 
-  } catch (error) {
-    // Handle any error that occurs
-    console.error(error);
-    // Optionally show an error message to the user
-  }
-}
+    // Function to fetch conversations from the endpoint
+    async function fetchConversations() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
 
-
-
-// Function to fetch conversations from the endpoint
-async function fetchConversations() {
-  try {
-    const accessToken = localStorage.getItem('access_token');
-    const config = {
-      headers: {
-        Authorization: 'Bearer ${accessToken}'
-      }
-    };
-
-    const response = await axios.get('http://localhost:9090/representative/getallconversationsoftherepresentative', config);
-    // Handle the response data
-    console.log(response.data);
-  } catch (error) {
-    // Handle any error that occurs
-    console.error(error);
-    // Optionally show an error message to the user
-  }
-}
+            const response = await axios.get('http://localhost:9090/representative/getallconversationsoftherepresentative', config);
+            // Handle the response data
+            console.log(response.data);
+        } catch (error) {
+            // Handle any error that occurs
+            console.error(error);
+            // Optionally show an error message to the user
+        }
+    }
 
 
 
