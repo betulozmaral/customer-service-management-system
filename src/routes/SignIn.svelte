@@ -35,17 +35,17 @@
 
     }
     
-
+/*
     async function submitHandler(event) {
             event.preventDefault();
             validateForm();
-            /* remember me box is checked
+             remember me box is checked
             if (status===true){
             }
-            */
+            
     }
 
-
+*/
     import axios from 'axios';
 
 /*
@@ -66,12 +66,12 @@ $: submitHandler = async () => {
 }
 */
 
-  /*
+  
 // Function to handle login request
     async function submitHandler(event) {
         try {
             const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
-                email: 'representative3@hotmail.com',
+                email: 'representative1@hotmail.com',
                 password: 'representative123*'
             });
 
@@ -82,7 +82,6 @@ $: submitHandler = async () => {
             console.log('Login successful');
             // Further processing or updating state in your Svelte component
             navigate('/chats');
-            fetchConversations();
 
         } catch (error) {
             // Handle any error that occurs
@@ -90,7 +89,7 @@ $: submitHandler = async () => {
             // Optionally show an error message to the user
         }
     }
-
+/*
     // Function to fetch conversations from the endpoint
     async function fetchConversations() {
         try {
