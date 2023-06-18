@@ -356,6 +356,14 @@
                             "externalId": "1668652563917414404",
                             "text": "Yardımınız için teşekkürler",
                             "time": 1686672747960,
+                            "direction": false,
+                            "readStatus": null
+                        },
+                        {
+                            "id": 420,
+                            "externalId": "1668651719197093892",
+                            "text": "Rica ederim, iyi günler.",
+                            "time": 1686672747960,
                             "direction": true,
                             "readStatus": null
                         }
