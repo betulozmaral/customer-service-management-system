@@ -1,18 +1,23 @@
 <script>
 
-    export let messageList = ["This is a message.", "lore ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem "];
+    export let messageList = [""];
     // default mesaj müşteriden temsilciye doğru. buna göre bubble rengi belirlenir. ve atanan profil fotoğrafı.
     export let fromRepresentative = false; 
     //default değer müşteri fotoğrafı. src gönderilmediyse müşteridendir. 
-    export let src = "../images/profile-icon-woman.png";
+    let srcCustomer = "../images/profile-icon-woman.png";
+    let srcRep = "../images/customer-support-male.png";
+    let src;
 
 </script>
 
 <div class="bubble" class:from-rep={fromRepresentative}>
     <!-- slot kullanılmalı mı data gönderirken gerekli mi -->
     <slot>
-        <img {src} alt="Profile" height="40px" width="40px">
-
+        {#if fromRepresentative===true}
+        <img src=srcRep alt="Profile" height="40px" width="40px">
+        {:else}
+        <img src=srcCustomer alt="Profile" height="40px" width="40px">
+        {/if}
         <!-- conditional class for bubble color -->
         <div class="messages">
         {#each messageList as msg}

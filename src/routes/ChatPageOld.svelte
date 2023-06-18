@@ -6,11 +6,9 @@
     import ChatStore from '../stores/ChatStore.js';
     import { DateInput } from 'date-picker-svelte';
     import axios from 'axios';
+    import Conversation from '../shared/Conversation.svelte';
 
-	
-	function datepicked (e) {
-		console.log(e.detail.datepicked)
-	}
+
 
 
     export let representative = {
@@ -31,62 +29,17 @@
     }
 
 
-    
-    let customerChat =[ {
-        customerName: "David",
-        customerId: "138",
-        messages: ["i cant find something..."],   
-        date: "12.20",
-        platform: "Instagram"
-    },
-    {
-        customerName: "Susan",
-        customerId: "123",
-        messages: ["hello, may i ask a question?"],
-        date: "13.05",
-        platform: "Twitter"
-    },
-    {
-        customerName: "Beth",
-        customerId: "102",
-        // message id'ye gerek var mı?
-        messages: ["asdfgjk"],
-        date: "12.25",
-        platform: "Twitter"
-    },
-    {
-        customerName: "John",
-        customerId: "192",
-        messages: ["agsghd sjckjscksc hskjcc"],
-        date: "09.25",
-        platform: "Telegram"
-    }
-    ];
-
-
-
-
-    let repChat = {
-        repName: representative.name,
-        repId: representative.id,
-        messageList: [{
-            message: "",
-            date: ""}]
-    };
-
-    let lastMessage;
-
-    	//tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
+    //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
 	let items = ["Open", "Completed"];
 	//başlarken hangisi aktif olacak?
-	let activeItem = "Open";
-	//bu propları tab componentına göndereceğiz.
-    let text="";
+	$: activeItem = "Open";
+
 
     const tabChangeHandler = (event) => {
 		//event objesi ve detail propertysini kullanarak gönderilen data'yı alabiliriz.
 		activeItem = event.detail;
 	};
+
 
     let dateStart = new Date();
     let dateEnd = new Date();
@@ -98,6 +51,27 @@
     const navigateHome = () => {
         showCalendar = false;
     };
+
+    let text="";
+    let conversation={};
+
+    const chatHandler = (event) => {
+        conversation = event.detail;
+
+    };
+
+    /*
+    let ChatList={};
+        ChatStore.subscribe((data) => {
+            const unsub = ChatStore.subscribe((data) => {
+        //bu data, store'un içinde ne data varsa o. data içeriği değişirse bu callback fonk. yeniden ateşlenecek 
+        //ve bize güncellenmiş datayı gönderecek.
+        ChatList = data;
+    });
+    });
+    */
+
+
 
 
 </script>
@@ -161,15 +135,19 @@
             {#if activeItem === "Open"}
                 <!--buraya gönderilen liste farklı olacak sadece.-->
                 <div class="chat-boxes">
+                    <ul>
                     <!--kaç tane varsa. sürekli güncellenecek. max kaç tane box görüntülenecek.storeda depolanabilir belki.-->
-                    <!-- bunlar chat boxlar. liste halinde sıralanır.son mesaj gönderilir sadece. -->
-                        {#each customerChat as customer}
-                            {#if customer.messages.length > 0}
-                            <!-- lastMessage = {customer.messages[customer.messages.length-1]}; -->
-                            <!-- aynı customer id'sine sahip mesajlar farklı boxlarda görünmemeli. storeda mı saklıyoruz? poll oluşturmaya bak.  -->
-                                <!-- <ChatBox customerName={customer.customerName} date={customer.date}  messages={customer.messages}/> -->
-                            {/if}
+                        <!-- bunlar chat boxlar. liste halinde sıralanır.son mesaj gönderilir sadece. -->
+                        {#each $ChatStore as conversation}
+                                <!-- burada customer mesajları yayınlanacak. o userIdnin üstündeki en son mesaj. -->
+                                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <li><ChatBox on:showChat={chatHandler}
+                                    chatId = {conversation.id} customerName={conversation.customerName} 
+                                    date={conversation.messages.at(-1).time} 
+                                    message={conversation.messages.at(-1).text}/>
+                                </li>
                         {/each}
+                    </ul>
                 </div>
             {:else if activeItem === "Completed"}
                 <p>Completed conversations</p>
@@ -189,17 +167,13 @@
             <div class="chat-header">
                 <div class="profile-container">
                     <img src="../images/profile-icon-woman.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
-                    <p>{customerChat[0].customerName}</p>
+                    <p>{conversation.customerName}</p>
                 </div>
                 <p class="platform">from platform</p>   
             </div>
             <div class="message-bubbles-wrapper">
-                <!-- müşteriden gelen mesajda src ye gerek yok.  -->
-                <!-- <MessageBubble messageList={customerChat[0].messages}/>  her yeni mesaj, ismi, ppsi, tarihi, mesaj bilgisiyle geliyor. -->
-            <!-- bu triggerlanarak gösterilmeli. yeni mesaj geldiğinde veya customer service yanıt gönderdiğinde
-            bu mesajlar yine bir yerde depolanacak. bir pencerede max şu kadar cm alan var, onu aşınca yukarı kaymalı. slider-->
-                <!-- temsilciden iletilen mesajda srcyi de göndeririz -->
-                <!-- <MessageBubble fromRepresentative = {true} messageList=repChat.messageList {src}/> -->
+                <Conversation chat={conversation}/> 
+            <!-- bu triggerlanarak gösterilmeli. yeni mesaj geldiğinde veya customer service yanıt gönderdiğinde-->
             </div>
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
@@ -338,6 +312,15 @@
         right: 20px;
     }
 
+    ul{
+        list-style-type: none;
+        margin : 0;
+        padding: 0;
+    }
+
+    li{
+        margin-bottom: 10px;
+    }
         
     
 </style>

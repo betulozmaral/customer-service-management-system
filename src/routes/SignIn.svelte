@@ -10,17 +10,17 @@
 
     let errors = { username: "", password: "" };
     let valid = false;
-/*
+
     function validateForm() {
         valid = true;
-        if (fields.username.trim() === "") {
+        if (email.trim() === "") {
             errors.username = "Username is required";
             valid = false;
         } else {
             errors.username = "";
         }
 
-        if (fields.password === "") {
+        if (password === "") {
             errors.password = "Password is required";
             valid = false;
         } else {
@@ -29,23 +29,22 @@
 
         if (valid) {
             // Burada authentication yapılacak
-            alert("Signed in");
-            dispatch("signIn", { ...fields });
-            //navigate('/chats');
+            dispatch("signIn", { email, password});  //dispatch ile ne yapıyorduk?
+            navigate('/chats');
         }
 
     }
-    */
-/*
+    
+
     async function submitHandler(event) {
             event.preventDefault();
-            //validateForm();
+            validateForm();
             /* remember me box is checked
             if (status===true){
             }
-            
+            */
     }
-    */
+
 
     import axios from 'axios';
 
@@ -67,7 +66,7 @@ $: submitHandler = async () => {
 }
 */
 
-  
+  /*
 // Function to handle login request
     async function submitHandler(event) {
         try {
@@ -113,7 +112,7 @@ $: submitHandler = async () => {
         }
     }
 
-
+*/
 
 /*
 onMount(async () => {
@@ -335,12 +334,6 @@ input[type=checkbox] {
 <!-- responsive tasarım. css kısmına geri dönülecek.
 hata mesajı yazılınca register linki aşağıya kayıyor, inputlar aşağı kayıyor. 
 butonun konumlandırması boxa göre olmalı vs. 
-neden tam ekran olmuyor? alttaki minik boşluk ne, nasıl gider
 em unit yerine px kullanırsak ne olur 
 position relative ve absolute nasıl kullanılıyordu
-Sign in ve Sİgn up farklı sayfalar mı olmalı yoksa aynı sayfaya farklı objeler olarak import edilip
-if-else yapısıyla mı gösterilmeli?
-register handler yazıalbilir belki. 
-net ninja add new poll ve poll list şeklinde iki nesne yapmıştı aynı sayfada. 
-tıklayınca diğerine geçiyordu, active item şeklinde bir değişke ile yapmıştı. Araştır. 
-kod tekrarlamamak için. -->
+ -->
