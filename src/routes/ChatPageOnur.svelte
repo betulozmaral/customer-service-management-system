@@ -1,12 +1,9 @@
 <script>
-    import ChatBox from '../shared/ChatBox.svelte';
-    import MessageBubble from '../shared/MessageBubble.svelte';
-	import Tabs from "../shared/Tabs.svelte";
+// @ts-nocheck
+
+    import Tabs from "../shared/Tabs.svelte";
     import {Link, navigate} from 'svelte-navigator';
     import { DateInput } from 'date-picker-svelte';
-    import Conversation from '../shared/Conversation.svelte';
-    import ChatStore from '../stores/ChatStore';
-
     export let representative = {
         name: "Sam",
         gender: "Male",
@@ -23,7 +20,6 @@
     else{
         src = "../images/customer-service-neutral.png";
     }
-
 
     //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
 	let items = ["Open", "Completed"];
@@ -49,7 +45,8 @@
     };
 
     let text="";
-
+    
+    let selectedChat = undefined;
     const chats = [
             {
                 "id": 41,
@@ -514,17 +511,15 @@
                     "satisfactionRate": null,
                     "duration": null
             }
-	]
-    
-    $: selectedChat = chats[0];
+	];
+
     function selectChat(id) {
         selectedChat = chats.find(chat => chat.id === id);
     }
 
-
 </script>
 
-<!-- bu elementlerin oturduğu beyaz pencere -->
+
 <div class="wrapper">   
     <header>
         <Link to="/">
@@ -581,72 +576,79 @@
             
             <!--Burada seçilen itema göre içerik göstereceğiz.-->
             {#if activeItem === "Open"}
-                <!--buraya gönderilen liste farklı olacak sadece.-->
+                <!-- <div style="display: flex;"> -->
+                <!-- <div class="chat-list"> -->
                 <div class="chat-boxes">
-                    <ul>
-                    <!--kaç tane varsa. sürekli güncellenecek. max kaç tane box görüntülenecek.storeda depolanabilir belki.-->
-                        <!-- bunlar chat boxlar. liste halinde sıralanır.son mesaj gönderilir sadece. -->
-                        {#each chats as conversation(conversation.id)}
-                                <!-- burada customer mesajları yayınlanacak. o userIdnin üstündeki en son mesaj. -->
-                                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="chat-list-item {selectedChat && selectedChat.id === conversation.id ? 'active' : ''}" on:click={() => selectChat(conversation.id)}>
-                                <li><ChatBox
-                                    chatId = {conversation.id} customerName={conversation.customerName} 
-                                    date={conversation.messages.at(-1).time} 
-                                    message={conversation.messages.at(-1).text}/>
-                                </li>
-                                </div>
-                        {/each}
-                    </ul>
+                    
+                {#each chats as chat (chat.id)}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}>
+                    <img {src} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
+                    <div class="name-and-message">
+                        <p class=name>user:{chat.externalId} from {chat.platform.toLowerCase()} </p>
+                        <!-- <p class=message>{message.substring(0,25)}...</p> son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
+                    </div>
+                    <!-- <p class=date>{chat.platform.toLowerCase()}</p> -->
                 </div>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <!-- <div class="chat-list-item {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}> -->
+                     <!-- <h4>user:{chat.externalId} from {chat.platform.toLowerCase()}</h4> -->
+                    <!-- </div> -->
+                {/each}
+                </div>
+                <!-- </div> -->
             {:else if activeItem === "Completed"}
                 <p>Completed conversations</p>
             {/if}
         </div>
 
-        <!--default olarak ilk chat, sonrasında chat listte hangi chate tıklandıysa o.-->
-        <div class="chat-window"> <!--sağ sütun-->
+
+    <div class="chat-window"> <!--sağ sütun-->
             {#if showCalendar===true}
                 <p>Başlangıç tarihi:</p>
                 <DateInput bind:value={dateStart}/>
                 <p>{dateStart}</p>
                 <p>Bitiş tarihi:</p>
                 <DateInput bind:value={dateEnd} />
-
+        <!-- <div class="chat-content"> -->
             {:else if selectedChat}
+            <!-- <h3>Chat with user {selectedChat.externalId}</h3> -->
             <div class="chat-header">
                 <div class="profile-container">
                     <img src="../images/profile-icon-woman.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
-                    <p>{selectedChat.customerName}</p>
+                    <p>User: {selectedChat.externalId}</p>
                 </div>
                 <p class="platform">from {selectedChat.platform}</p>   
-            </div>
+            </div> 
             <div class="message-bubbles-wrapper">
-                <Conversation chat={selectedChat}/> 
-            <!-- bu triggerlanarak gösterilmeli. yeni mesaj geldiğinde veya customer service yanıt gönderdiğinde-->
+            {#each selectedChat.messages as message (message.id)}
+                <div class="message {message.direction ? 'sent' : 'received'}">
+                    <p>{message.text}</p>
+                    <small>{new Date(message.time).toLocaleString()}</small>
+                </div>
+            {/each}
             </div>
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
                 <input bind:value={text} type="text" placeholder="Type a message">
-                <div class="send-button">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="send-button" on:click={()=>console.log(text)}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
                         fill="#7596e3"/>    <!--iconun rengini değiştirebilirsin.-->
                     </svg>
+                        
                 </div>
             </div>
+        <!-- </div> -->
             {/if}
-        </div>
+    </div>
     </main>
-
-
 </div>
 
-
-
-
 <style>
-    .wrapper{
+
+.wrapper{
         max-width: 1200px;
         height: 700px; /*sonradan bu pencere boyutunu ayarla */
         margin: 20px auto;
@@ -770,6 +772,69 @@
     li{
         margin-bottom: 10px;
     }
-        
+
+
+
+    .chat-list {
+        width: 30%;
+        overflow: auto;
+        border-right: 1px solid #ddd;
+    }
+
+    .chat-content {
+        width: 70%;
+        padding: 1rem;
+        overflow: auto;
+    }
+
+    .chat-list-item {
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .chat-list-item.active {
+        background: #ddd;
+    }
+
+    .message.sent {
+        text-align: right;
+    }
+
+    .message.received {
+        text-align: left;
+    }
     
+    .message.sent {
+    text-align: right;
+    background-color: #dcf8c6;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px;
+}
+
+.message.received {
+    text-align: left;
+    background-color: #ffffff;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px;
+}
+
+.chat-box{
+        display: flex;
+        position: relative;
+        background: #f1f1f198;
+        border-radius: 10px;
+        padding: 0 5px;
+        font-size: small;
+    }
+
+
+
+    .name-and-message{
+        margin-left: 15px;
+
+    } 
+
+
 </style>
