@@ -33,8 +33,8 @@
     let dateEnd = new Date();
 
     //gmt +3 eklemek lazım.
-    $: startTime = dateStart.toISOString().slice(0,-5);
-    $: endTime = dateEnd.toISOString().slice(0,-5);
+    $: startTime = dateStart.toISOString();
+    $: endTime = dateEnd.toISOString();
 
 
   async function sendDate() {
@@ -330,7 +330,7 @@ let chats = [];
                 <!-- <p>{dateStart.toLocaleString()} - {dateEnd.toLocaleString()}</p> -->
                 {#each representative.availableWorkHours as workHour}
                 <div class="work-hour">
-                    <p>{moment(workHour.startTime).format('DD-MM-YYYY, H:MM')} - {moment(workHour.endTime).format('DD-MM-YYYY, H:MM')}</p>
+                    <p>{moment(workHour.startTime).format('YYYY-MM-DD HH:mm:ss')} - {moment(workHour.endTime).format('YYYY-MM-DD HH:mm:ss')}</p>
                     <!-- <button class="delete-work-hour" on:click={() => deleteWorkHour(workHour.id)}>Delete</button> -->
                 </div>
                 {/each}
