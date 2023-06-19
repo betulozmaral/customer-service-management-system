@@ -1,8 +1,9 @@
 <script>
-    import { createEventDispatcher } from "svelte";
-    import {Link, navigate} from 'svelte-navigator';
+    // import { createEventDispatcher } from "svelte";
+    import {Link, Route, navigate} from 'svelte-navigator';
+    import axios from 'axios';
 
-    let dispatch = createEventDispatcher();
+    // let dispatch = createEventDispatcher();
 
     let registerFields = {
         email: "",
@@ -13,8 +14,10 @@
 
     let errors = { email: "", username: "", password: ""};
     let valid = false;
+    let form = false;
 
-    const registerHandler = () => {
+    /*
+    function validateForm(){
         valid = true;
         if (registerFields.email.trim() === "") {
             errors.email = "Email is required";
@@ -49,12 +52,44 @@
         }
 
         if (valid) {
-            // Burada kayıt yapılacak. 
-            alert("Signed up");
-            dispatch("signUp", { ...registerFields });
-            navigate('/');//sign in sayfasına git. 
+            // Burada kayıt yapılacak.
+            console.log("Valid form");
+            registerHandler();
+            navigate('/');
         }
-    };
+        else {
+            console.log("Invalid form");
+        }
+      };
+      */
+
+    async function registerHandler(event) {
+          // Function to handle register request
+            try {
+              const response = await axios.post('http://localhost:9090/api/v1/auth/register', {
+                email: registerFields.email,
+                password: registerFields.password,
+                firstname: registerFields.username,
+                role: "REPRESENTATIVE"
+            });
+
+            // Handle the response data
+            // const { access_token } = response.data;
+            // localStorage.setItem('access_token', access_token);
+
+            console.log('Sign up successful');
+            navigate('/');
+            // Further processing or updating state in your Svelte component
+            } catch (error) {
+            // Handle any error that occurs
+            console.error(error);
+            // Optionally show an error message to the user
+            }
+        
+      }
+      
+        
+    
     
 
 </script>
@@ -77,30 +112,32 @@
           <p class="slogan">Manage customer feedback simply</p>
   
           <div class="form-area">
-          <form on:submit={registerHandler}>
+          <form on:submit|preventDefault={registerHandler}>
+          <!-- <form on:submit={validateForm}> -->
+
             <!-- Your login form fields -->
             <div class="form-field">
               <label for="email">Email</label>
-              <input type="email" id="email" bind:value={registerFields.email} placeholder="Enter your email" required/>
+              <input type="email" id="email" bind:value={registerFields.email} placeholder="Enter your email"/>
               <div class="error">{errors.email}</div>
 
             </div>
             <div class="form-field">
               <label for="uname">User name</label>
-              <input type="text" id="uname" bind:value={registerFields.username} placeholder="Enter your user name" required/>
+              <input type="text" id="uname" bind:value={registerFields.username} placeholder="Enter your user name"/>
               <div class="error">{errors.username}</div>
 
             </div>
             <div class="form-field">
               <label for="pswrd">Password</label>
-              <input type="password" id="pswrd" bind:value={registerFields.password} placeholder="Enter your password" required />
+              <input type="password" id="pswrd" bind:value={registerFields.password} placeholder="Enter your password"  />
               <span class="show-password"></span>
               <div class="error">{errors.password}</div>
 
             </div>
             <div class="form-field">
               <label for="pswrd-a">Confirm password</label>
-              <input type="password" id="pswrd-a" bind:value={registerFields.passwordConfirm} placeholder="Confirm your password" required />
+              <input type="password" id="pswrd-a" bind:value={registerFields.passwordConfirm} placeholder="Confirm your password"  />
               <span class="show-password"></span>
             </div>
             <button type="submit">Register</button>

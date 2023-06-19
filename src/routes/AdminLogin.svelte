@@ -1,8 +1,5 @@
 <script>
-    // import { createEventDispatcher } from "svelte";
     import {Link, navigate} from 'svelte-navigator';
-    // let dispatch = createEventDispatcher();
-    import {onMount} from 'svelte';
     import axios from 'axios';
 
 
@@ -12,51 +9,13 @@
     let errors = { username: "", password: "" };
     let valid = false;
 
-    /*
-    function validateForm() {
-        valid = true;
-        if (email.trim() === "") {
-            errors.username = "Username is required";
-            valid = false;
-        } else {
-            errors.username = "";
-        }
-
-        if (password === "") {
-            errors.password = "Password is required";
-            valid = false;
-        } else {
-            errors.password = "";
-        }
-
-        if (valid) {
-            // Burada authentication yapılacak
-            dispatch("signIn", { email, password});  //dispatch ile ne yapıyorduk?
-            navigate('/chats');
-        }
-
-    }
-    */
-    
-/*
-    async function submitHandler(event) {
-            event.preventDefault();
-            validateForm();
-             remember me box is checked
-            if (status===true){
-            }
-            
-    }
-
-*/
-
   
 // Function to handle login request
     async function submitHandler(event) {
         try {
             const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
-                // email: 'representative1@hotmail.com',
-                // password: 'representative123*',
+                // email: 'admin@hotmail.com',
+                // password: 'admin123*',
                 email: email,
                 password: password
             });
@@ -67,7 +26,7 @@
 
             console.log('Login successful');
             // Further processing or updating state in your Svelte component
-            navigate('/chats');
+            navigate('/adminpanel');
 
         } catch (error) {
             // Handle any error that occurs
@@ -82,22 +41,17 @@
 
 <div class="wrapper">
     <main>
-        <div class="header">
         <Link to="/"><img
             src="../images/logo-no-background.png"
             alt="Orion logo"
             height="50px"
             width="auto"
         /></Link>
-        <Link to='/adminlogin'>
-            <div class="admin-login">Admin Login</div>
-        </Link>
-        </div>
         <div class="container">
             <div class="left-col">
                 <!-- Buraya form kutucuğu gelecek -->
                 <div class="column-box">
-                    <h2>Welcome!</h2>
+                    <h2>Admin</h2>
                     <h1>Sign in</h1>
                     <p class="slogan">Manage customer feedback simply</p>
                     <div class="form-area">
@@ -165,17 +119,6 @@
         max-width: 1200px;
         margin: 20px auto;
     }
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-right: 120px;
-        /* margin-top: 30px; */
-    }
-    .admin-login{
-        font-size: 20px;
-        font-weight: 500;
-    }
 
     /* Şu an nesneler iki sütunlu. nesneleri ortala*/
     .container {
@@ -217,7 +160,7 @@
 /* welcome */
 h2 {
     font-size: 25px;
-    font-weight: 300;
+    font-weight: 500;
     margin: 0;
 }
 
@@ -300,9 +243,3 @@ input[type=checkbox] {
 
 </style>
 
-<!-- responsive tasarım. css kısmına geri dönülecek.
-hata mesajı yazılınca register linki aşağıya kayıyor, inputlar aşağı kayıyor. 
-butonun konumlandırması boxa göre olmalı vs. 
-em unit yerine px kullanırsak ne olur 
-position relative ve absolute nasıl kullanılıyordu
- -->

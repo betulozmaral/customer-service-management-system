@@ -1,27 +1,113 @@
 <script>
 // @ts-nocheck
-
+    import moment from 'moment';
     import Tabs from "../shared/Tabs.svelte";
     import {Link, navigate} from 'svelte-navigator';
     import { DateInput } from 'date-picker-svelte';
-        import { onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import axios from 'axios';
-    export let representative = {
-        name: "Sam",
-        gender: "Male",
-        id:123
+    // import fetch from "node-fetch";
+
+    let representative = {};
+    let gender = "Male";
+    /*        
+    "id": 6,
+    "firstname": "representative1",
+    "lastname": "denneme5",
+    "email": "representative1@hotmail.com",
+    "availableWorkHours": [
+        {
+            "startTime": "2023-06-19T09:00:00",
+            "endTime": "2023-06-19T17:00:00"
+        }
+    ]*/
+
+    
+
+
+    let response = '';
+    let selectedChat = undefined;
+    let text="";
+
+    let dateStart = new Date();
+    let dateEnd = new Date();
+
+    //gmt +3 eklemek lazım.
+    $: startTime = dateStart.toISOString().slice(0,-5);
+    $: endTime = dateEnd.toISOString().slice(0,-5);
+
+
+  async function sendDate() {
+    const url = 'http://localhost:9090/representative/addtimerangetorepresentative';
+    const token = localStorage.getItem('access_token');
+    const data = {
+      "startTime": startTime,
+      "endTime": endTime,
     };
 
-    export let src;
-    if (representative.gender === "Female"){
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        response = await res.json();
+      } else {
+        throw new Error(res.status);
+      }
+    } catch (error) {
+      response = `An error occurred: ${error.message}`;
+    }
+  }
+
+
+
+  async function sendData() {
+    const url = 'http://localhost:9090/representative/sendmessagebyconversationid';
+    const token = localStorage.getItem('access_token');
+    const data = {
+      "id": selectedChat.id,
+      "text": text,
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        response = await res.json();
+        text='';
+      } else {
+        throw new Error(res.status);
+      }
+    } catch (error) {
+      response = `An error occurred: ${error.message}`;
+    }
+  }
+
+    let src;
+    if (gender === "Female"){
         src = "../images/customer-service-agent.png"
     }
-    else if(representative.gender === "Male"){
+    else if(gender === "Male"){
         src = "../images/customer-support-male.png";
     }
     else{
         src = "../images/customer-service-neutral.png";
     }
+
+    let srcCustomer = "../images/profile-icon.png";
 
     //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
 	let items = ["Open", "Completed"];
@@ -35,8 +121,7 @@
 	};
 
 
-    let dateStart = new Date();
-    let dateEnd = new Date();
+
     let showCalendar = false;
     const pickDate = () => {
 		showCalendar = true;
@@ -46,10 +131,8 @@
         showCalendar = false;
     };
 
-    let text="";
     
-    let selectedChat = undefined;
-    let chats = [];
+let chats = [];
   async function fetchConversations() {
         try {
             const accessToken = localStorage.getItem('access_token');
@@ -71,6 +154,69 @@
     function selectChat(id) {
         selectedChat = chats.find(chat => chat.id === id);
     }
+
+    let endedChats = [];
+    // let selectedChatEnded = undefined;
+    response = '';
+
+
+    async function fetchEndedConversations() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+
+            const response = await axios.get('http://localhost:9090/representative/getallendedconversationsoftherepresentative', config);
+            endedChats = response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    onMount(fetchEndedConversations);
+    function selectEndedChat(id) {
+        selectedChat = endedChats.find(chat => chat.id === id);
+    }
+
+    async function endChat(id) {
+        try{
+        const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+            const url= 'http://localhost:9090/representative/endconversationbyid/'+id;
+            // url=url.concat(id);
+            const response = await axios.post(url, null, config);
+        } catch(error) {
+            console.error(error);
+        }
+    }
+
+    async function getRepresentativeInfo() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+
+            const response = await axios.get('http://localhost:9090/representative/getrepresentativeinformationbytoken', config);
+            representative = response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    onMount(getRepresentativeInfo);
+
 
 </script>
 
@@ -117,7 +263,7 @@
 
         <div class="account-info">
             <img {src} alt="Profile" height="40px" width="40px">
-            <p>{representative.name}</p>
+            <p>{representative.firstname}</p>
         </div>
 
     </header>
@@ -134,46 +280,71 @@
                 <!-- <div style="display: flex;"> -->
                 <!-- <div class="chat-list"> -->
                 <div class="chat-boxes">
-                    
-                {#each chats as chat (chat.id)}
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}>
-                    <img {src} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
-                    <div class="name-and-message">
-                        <p class=name>user:{chat.externalId} from {chat.platform.toLowerCase()} </p>
-                        <!-- <p class=message>{message.substring(0,25)}...</p> son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
-                    </div>
-                    <!-- <p class=date>{chat.platform.toLowerCase()}</p> -->
+                    <!-- <ul> -->
+                        {#each chats as chat (chat.id)}
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                            <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}>
+                            <!-- <li> -->
+                                <img class="chat-box-pp" src={srcCustomer} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
+                                <div class="name-and-message">
+                                    <p class=name>user:{chat.externalId.slice(0,6)}</p>
+                                    <p class=message>{chat.messages.at(-1).text.substring(0,25)}...</p> <!--son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
+                                </div>
+                                <p class=date>{new Date(chat.messages.at(-1).time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                            <!-- </li> -->
+                            </div>
+                         {/each}
+                     <!-- </ul> -->
                 </div>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <!-- <div class="chat-list-item {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}> -->
-                     <!-- <h4>user:{chat.externalId} from {chat.platform.toLowerCase()}</h4> -->
-                    <!-- </div> -->
-                {/each}
-                </div>
-                <!-- </div> -->
             {:else if activeItem === "Completed"}
-                <p>Completed conversations</p>
+                <!-- <p>Completed conversations</p> -->
+                <div class="chat-boxes">
+                    {#each endedChats as chat (chat.id) }
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectEndedChat(chat.id)}>
+                        <img class="chat-box-pp" src={srcCustomer} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
+                        <div class="name-and-message">
+                        <p class=name>user:{chat.externalId.slice(0,6)}</p>
+                        <p class=message>{chat.messages.at(-1).text.substring(0,25)}...</p> <!--son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
+                     </div>
+                    <p class=date>{new Date(chat.messages.at(-1).time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    </div>
+                 {/each}
+                </div>
             {/if}
         </div>
 
 
     <div class="chat-window"> <!--sağ sütun-->
             {#if showCalendar===true}
+            <div class="setting-work-hours">
                 <p>Başlangıç tarihi:</p>
                 <DateInput bind:value={dateStart}/>
-                <p>{dateStart}</p>
+                <!-- <p>{startTime}</p> -->
                 <p>Bitiş tarihi:</p>
                 <DateInput bind:value={dateEnd} />
-        <!-- <div class="chat-content"> -->
+                <button class="set-date" on:click={sendDate}>Set available work hours</button>
+            </div>
+            <div class="getting-work-hours">
+                <p>Available work hours:</p>
+                <!-- <p>{dateStart.toLocaleString()} - {dateEnd.toLocaleString()}</p> -->
+                {#each representative.availableWorkHours as workHour}
+                <div class="work-hour">
+                    <p>{moment(workHour.startTime).format('DD-MM-YYYY, H:MM')} - {moment(workHour.endTime).format('DD-MM-YYYY, H:MM')}</p>
+                    <!-- <button class="delete-work-hour" on:click={() => deleteWorkHour(workHour.id)}>Delete</button> -->
+                </div>
+                {/each}
+            </div>
             {:else if selectedChat}
             <!-- <h3>Chat with user {selectedChat.externalId}</h3> -->
             <div class="chat-header">
                 <div class="profile-container">
-                    <img src="../images/profile-icon-woman.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
-                    <p>User: {selectedChat.externalId}</p>
+                    <img src="../images/profile-icon.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
+                    <p>User: {selectedChat.externalId.slice(0,6)}</p>
                 </div>
-                <p class="platform">from {selectedChat.platform}</p>   
+                <p class="platform">from {selectedChat.platform.toLowerCase()}</p>  
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <button class="end-chat" on:click={() => endChat(selectedChat.id)}>End chat</button> 
             </div> 
             <div class="message-bubbles-wrapper">
             {#each selectedChat.messages as message (message.id)}
@@ -187,7 +358,7 @@
                 <!-- Mesajları yazdırsın ekrana. -->
                 <input bind:value={text} type="text" placeholder="Type a message">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="send-button" on:click={()=>console.log(text)}>
+                <div class="send-button" on:click={sendData}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
                         fill="#7596e3"/>    <!--iconun rengini değiştirebilirsin.-->
@@ -336,20 +507,7 @@
         border-right: 1px solid #ddd;
     }
 
-    .chat-content {
-        width: 70%;
-        padding: 1rem;
-        overflow: auto;
-    }
 
-    .chat-list-item {
-        padding: 1rem;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .chat-list-item.active {
-        background: #ddd;
-    }
 
     .message.sent {
         text-align: right;
@@ -384,12 +542,30 @@
         font-size: small;
     }
 
-
+    .date{
+        position: absolute;
+        right: 10px;
+    }
 
     .name-and-message{
-        margin-left: 15px;
+        margin-left: 45px;
 
     } 
+    .chat-box-pp{
+        position: absolute;
+        top: 6px;
+    }
+
+    .set-date{
+        padding: 5px 5px;
+        font-size: small;
+        margin-top: 20px;
+    }
+    .end-chat{
+        padding: 5px 5px;
+        font-size: medium;
+        /* margin-bottom: 15px; */
+    }
 
 
 </style>

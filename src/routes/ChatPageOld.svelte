@@ -5,7 +5,6 @@
     import {Link, navigate} from 'svelte-navigator';
     import { DateInput } from 'date-picker-svelte';
     import Conversation from '../shared/Conversation.svelte';
-    import ChatStore from '../stores/ChatStore';
 
     export let representative = {
         name: "Sam",
