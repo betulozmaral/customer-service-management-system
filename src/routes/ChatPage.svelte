@@ -15,8 +15,7 @@
     };
     export let logout;
     let message = "";
-    const query = db.collection("chats").orderBy("date", "desc");
-    const chats = collectionData(query, "id").pipe(startWith([]));
+  
 
     //representative'ın cinsiyetine göre resim değişecek.
     let src;
@@ -43,32 +42,8 @@
 		activeItem = event.detail;
 	};
 
-    function sendMessage(){
-        //text'i MessageBubble'a gönder
-        db.collection("chats").add({
-            userId: representative.id,
-            message: message,
-            // messageId?
-            date: +new Date(),
-            fromRepresentative: true
-        });
-        message = "";
-    }
 
-    const handleChatBox = (id) =>{
-        //chatbox'a tıklayınca ilgili sohbet ekranına yönlendir.
-        // bu idnin gönderdiği ve bu id'ye gönderilen tüm mesajları getir,
-        //chat-window componentına gönder. 
-        ChatStore.update((chat) => {
-            chat.forEach((customer) => {
-                if(customer.userId === id){
-                    customer.messages.forEach((message) => {
-                        MessageBubble.messageList.push(message);
-                    });
-                }
-            });
-        });
-    };
+
 
 
 
@@ -155,6 +130,7 @@
                 </div>
                 <p class="platform">from platform</p>   
             </div>
+            
             <div class="message-bubbles-wrapper">
                 <!-- temsilciden iletilen mesajda srcyi de göndeririz -->
                 {#each $chats as chat }
@@ -163,6 +139,8 @@
                 {/if}
                 {/each}
             </div>
+
+
             <div class="msg-input-box">
                 <!-- Mesajları yazdırsın ekrana. -->
                 <input bind:value={message} type="text" placeholder="Type a message">

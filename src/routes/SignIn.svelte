@@ -103,7 +103,7 @@
                     <div class="form-area">
                         <form on:submit|preventDefault={submitHandler}>
                             <div class="form-field">
-                                <label for="username">Username</label>
+                                <label for="username">Email</label>
                                 <input type="text" id="username" bind:value={email} />
                                 <div class="error">{errors.username}</div>
                             </div>

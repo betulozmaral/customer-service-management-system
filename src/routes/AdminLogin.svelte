@@ -57,7 +57,7 @@
                     <div class="form-area">
                         <form on:submit|preventDefault={submitHandler}>
                             <div class="form-field">
-                                <label for="username">Username</label>
+                                <label for="username">Email</label>
                                 <input type="text" id="username" bind:value={email} />
                                 <div class="error">{errors.username}</div>
                             </div>
@@ -81,16 +81,7 @@
                             <button type="submit">Login</button>
                         </form>
                     </div>
-                
-                    <div class="register-link">
-                        Don't have an account?
-                        <!-- <Link to="/signup"><strong>Register</strong></Link> -->
-                        <!-- Üstüne tıklayınca bir işlem mi gerçekleştirmeli? handler fonk lazım olabilir
-                        ayrı sayfalar değiller çünkü. -->
-                        <Link to="/signup">
-                        <strong>Register here</strong>
-                        </Link>
-                    </div>
+
                 </div>
                 <!-- default olarak login. registera basılırsa register. -->
             </div>
@@ -196,12 +187,7 @@ h1 {
     font-weight: 300;
 }
 
-.register-link{
-    font-size: 16px;
-    font-weight: 300;
-    margin: 20px 0;
-    text-align: center;
-}
+
 
 button {
     width: 100%;

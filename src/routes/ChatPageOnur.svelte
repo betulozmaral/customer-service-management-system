@@ -6,24 +6,8 @@
     import { DateInput } from 'date-picker-svelte';
     import { onMount } from 'svelte';
     import axios from 'axios';
-    // import fetch from "node-fetch";
 
     let representative = {};
-    let gender = "Male";
-    /*        
-    "id": 6,
-    "firstname": "representative1",
-    "lastname": "denneme5",
-    "email": "representative1@hotmail.com",
-    "availableWorkHours": [
-        {
-            "startTime": "2023-06-19T09:00:00",
-            "endTime": "2023-06-19T17:00:00"
-        }
-    ]*/
-
-    
-
 
     let response = '';
     let selectedChat = undefined;
@@ -32,7 +16,6 @@
     let dateStart = new Date();
     let dateEnd = new Date();
 
-    //gmt +3 eklemek lazım.
     $: startTime = dateStart.toISOString();
     $: endTime = dateEnd.toISOString();
 
@@ -96,18 +79,13 @@
     }
   }
 
-    let src;
-    if (gender === "Female"){
-        src = "../images/customer-service-agent.png"
-    }
-    else if(gender === "Male"){
-        src = "../images/customer-support-male.png";
-    }
-    else{
-        src = "../images/customer-service-neutral.png";
-    }
+    let src = "../images/customer-service-neutral.png";
 
-    let srcCustomer = "../images/profile-icon.png";
+    let srcCustomer1 = "../images/profile-icon.png";
+    let srcCustomer2 = "../images/profile-icon-woman.png";
+
+    let srcCustomer = srcCustomer2;
+    
 
     //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
 	let items = ["Open", "Completed"];
@@ -156,7 +134,6 @@ let chats = [];
     }
 
     let endedChats = [];
-    // let selectedChatEnded = undefined;
     response = '';
 
 
@@ -192,7 +169,6 @@ let chats = [];
                 }
             };
             const url= 'http://localhost:9090/representative/endconversationbyid/'+id;
-            // url=url.concat(id);
             const response = await axios.post(url, null, config);
         } catch(error) {
             console.error(error);
@@ -277,8 +253,6 @@ let chats = [];
             
             <!--Burada seçilen itema göre içerik göstereceğiz.-->
             {#if activeItem === "Open"}
-                <!-- <div style="display: flex;"> -->
-                <!-- <div class="chat-list"> -->
                 <div class="chat-boxes">
                     <!-- <ul> -->
                         {#each chats as chat (chat.id)}
@@ -291,10 +265,8 @@ let chats = [];
                                     <p class=message>{chat.messages.at(-1).text.substring(0,25)}...</p> <!--son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
                                 </div>
                                 <p class=date>{new Date(chat.messages.at(-1).time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                            <!-- </li> -->
                             </div>
                          {/each}
-                     <!-- </ul> -->
                 </div>
             {:else if activeItem === "Completed"}
                 <!-- <p>Completed conversations</p> -->
@@ -320,14 +292,12 @@ let chats = [];
             <div class="setting-work-hours">
                 <p>Başlangıç tarihi:</p>
                 <DateInput bind:value={dateStart}/>
-                <!-- <p>{startTime}</p> -->
                 <p>Bitiş tarihi:</p>
                 <DateInput bind:value={dateEnd} />
                 <button class="set-date" on:click={sendDate}>Set available work hours</button>
             </div>
             <div class="getting-work-hours">
                 <p>Available work hours:</p>
-                <!-- <p>{dateStart.toLocaleString()} - {dateEnd.toLocaleString()}</p> -->
                 {#each representative.availableWorkHours as workHour}
                 <div class="work-hour">
                     <p>{moment(workHour.startTime).format('YYYY-MM-DD HH:mm:ss')} - {moment(workHour.endTime).format('YYYY-MM-DD HH:mm:ss')}</p>
@@ -336,37 +306,46 @@ let chats = [];
                 {/each}
             </div>
             {:else if selectedChat}
-            <!-- <h3>Chat with user {selectedChat.externalId}</h3> -->
             <div class="chat-header">
                 <div class="profile-container">
-                    <img src="../images/profile-icon.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
+                    <img src={srcCustomer} alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
                     <p>User: {selectedChat.externalId.slice(0,6)}</p>
                 </div>
                 <p class="platform">from {selectedChat.platform.toLowerCase()}</p>  
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <button class="end-chat" on:click={() => endChat(selectedChat.id)}>End chat</button> 
             </div> 
+
+
             <div class="message-bubbles-wrapper">
             {#each selectedChat.messages as message (message.id)}
-                <div class="message {message.direction ? 'sent' : 'received'}">
-                    <p>{message.text}</p>
-                    <small>{new Date(message.time).toLocaleString()}</small>
+                <div class="bubble" class:from-rep={message.direction}>
+                    {#if message.direction===true}
+                        <img src={src} alt="Profile" height="40px" width="40px">
+                    {:else}
+                        <img src={srcCustomer} alt="Profile" height="40px" width="40px">
+                    {/if}
+                    <!-- conditional class for bubble color -->
+                    <div class="messages">
+                        <p>{message.text}</p>
+                        <small>{new Date(message.time).toLocaleString()}</small>
+                    </div>
                 </div>
             {/each}
             </div>
+
+
             <div class="msg-input-box">
-                <!-- Mesajları yazdırsın ekrana. -->
                 <input bind:value={text} type="text" placeholder="Type a message">
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="send-button" on:click={sendData}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
-                        fill="#7596e3"/>    <!--iconun rengini değiştirebilirsin.-->
+                        fill="#7596e3"/>    
                     </svg>
                         
                 </div>
             </div>
-        <!-- </div> -->
             {/if}
     </div>
     </main>
@@ -376,13 +355,18 @@ let chats = [];
 
 .wrapper{
         max-width: 1200px;
-        height: 700px; /*sonradan bu pencere boyutunu ayarla */
+        height: 700px;
         margin: 20px auto;
         padding: 20px;
         background: #f7f7f71e;
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         border-radius: 16px;
 
+    }
+
+    .message-bubbles-wrapper img{
+        border-radius: 10px;
+        margin: 5px 5px;
     }
 
     .chat-list, .chat-window{
@@ -457,10 +441,47 @@ let chats = [];
         gap:10px;
     }
 
+
     .message-bubbles-wrapper{
         height: 400px;
         overflow-y: scroll;
         position: relative;
+    }
+
+    .message-bubbles-wrapper p{
+        border-radius: 12px;
+        font-size: small;
+        font-weight: 400;
+        padding: 8px 16px;
+        background: #F1F1F1;
+        color: black;
+        max-width: 300px;
+        margin-top: 8px;
+
+    }
+
+
+    .bubble.from-rep p{
+  
+        background: #7596e3; /*daha koyu da olabilir, veya mavi renkli */
+        color: white; /*siyah da kalabilirdi*/
+    }
+
+    .bubble.from-rep{
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        position: absolute;
+        right: 20px;
+    }
+
+
+    .bubble{    /*buraları düzenle. */
+        display: flex;
+        margin: 24px 0;
+    }
+
+    .messages{
+        gap: 5px;
     }
     
     .msg-input-box input{
@@ -508,32 +529,7 @@ let chats = [];
     }
 
 
-
-    .message.sent {
-        text-align: right;
-    }
-
-    .message.received {
-        text-align: left;
-    }
-    
-    .message.sent {
-    text-align: right;
-    background-color: #dcf8c6;
-    border-radius: 5px;
-    margin: 10px;
-    padding: 10px;
-}
-
-.message.received {
-    text-align: left;
-    background-color: #ffffff;
-    border-radius: 5px;
-    margin: 10px;
-    padding: 10px;
-}
-
-.chat-box{
+    .chat-box{
         display: flex;
         position: relative;
         background: #f1f1f198;

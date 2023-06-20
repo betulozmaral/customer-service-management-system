@@ -4,21 +4,9 @@
     import {Link} from 'svelte-navigator';
 
 
-    let src = "../images/customer-service-neutral.png"
+    let src = "../images/customer-support-male.png";
     let admin= {};
 
-    let tableData = [
-    {
-        "col1" : "value1",
-        "col2" : "value2",
-        "col3" : "value3",
-    },
-    {
-        "col1" : "value4",
-        "col2" : "value5",
-        "col3" : "value6",
-    }
-  ];
 
   let repTable=[{}];
 
