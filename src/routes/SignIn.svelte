@@ -1,7 +1,5 @@
 <script>
-    // import { createEventDispatcher } from "svelte";
     import {Link, navigate} from 'svelte-navigator';
-    // let dispatch = createEventDispatcher();
     import {onMount} from 'svelte';
     import axios from 'axios';
 
@@ -12,43 +10,6 @@
     let errors = { username: "", password: "" };
     let valid = false;
 
-    /*
-    function validateForm() {
-        valid = true;
-        if (email.trim() === "") {
-            errors.username = "Username is required";
-            valid = false;
-        } else {
-            errors.username = "";
-        }
-
-        if (password === "") {
-            errors.password = "Password is required";
-            valid = false;
-        } else {
-            errors.password = "";
-        }
-
-        if (valid) {
-            // Burada authentication yapılacak
-            dispatch("signIn", { email, password});  //dispatch ile ne yapıyorduk?
-            navigate('/chats');
-        }
-
-    }
-    */
-    
-/*
-    async function submitHandler(event) {
-            event.preventDefault();
-            validateForm();
-             remember me box is checked
-            if (status===true){
-            }
-            
-    }
-
-*/
 
   
 // Function to handle login request
@@ -66,13 +27,10 @@
             localStorage.setItem('access_token', access_token);
 
             console.log('Login successful');
-            // Further processing or updating state in your Svelte component
             navigate('/chats');
 
         } catch (error) {
-            // Handle any error that occurs
             console.error(error);
-            // Optionally show an error message to the user
         }
     }
 
@@ -130,9 +88,6 @@
                 
                     <div class="register-link">
                         Don't have an account?
-                        <!-- <Link to="/signup"><strong>Register</strong></Link> -->
-                        <!-- Üstüne tıklayınca bir işlem mi gerçekleştirmeli? handler fonk lazım olabilir
-                        ayrı sayfalar değiller çünkü. -->
                         <Link to="/signup">
                         <strong>Register here</strong>
                         </Link>
@@ -160,7 +115,6 @@
 
 <style>
 
-/* main kullanılabilir miydi bunun yerine */
 .wrapper {
         max-width: 1200px;
         margin: 20px auto;
@@ -170,7 +124,6 @@
         justify-content: space-between;
         align-items: center;
         margin-right: 120px;
-        /* margin-top: 30px; */
     }
     .admin-login{
         font-size: 20px;
@@ -182,13 +135,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        /* margin: 20px auto; */
-        gap: 20px; /*iki sütun arasında ne kadar boşluk olsun istiyorsan.*/
+        gap: 20px; 
     }
     /* eşit boyutta divler.  */
     .left-col,.right-col {
         width: 50%;
-        height: 600px; /*ekran boyutu kadar yapabilirim ileride. */
+        height: 600px; 
     }
 
     
@@ -197,7 +149,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        /*text-align: center; /*bu yatay olarak ortaladı. */
     }
     .right-col img{
         border-radius: 10px;
@@ -300,9 +251,3 @@ input[type=checkbox] {
 
 </style>
 
-<!-- responsive tasarım. css kısmına geri dönülecek.
-hata mesajı yazılınca register linki aşağıya kayıyor, inputlar aşağı kayıyor. 
-butonun konumlandırması boxa göre olmalı vs. 
-em unit yerine px kullanırsak ne olur 
-position relative ve absolute nasıl kullanılıyordu
- -->

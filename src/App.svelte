@@ -2,7 +2,7 @@
   import SignUp from './routes/SignUp.svelte';
   import SignIn from './routes/SignIn.svelte';
   import { Router, Route } from 'svelte-navigator';
-  import ChatPage from './routes/ChatPageOnur.svelte';
+  import ChatPage from './routes/ChatPage.svelte';
   import AdminLogin from './routes/AdminLogin.svelte';
   import AdminPanel from './routes/AdminPanel.svelte';
 

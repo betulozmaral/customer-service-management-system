@@ -1,9 +1,7 @@
 <script>
-    // import { createEventDispatcher } from "svelte";
     import {Link, Route, navigate} from 'svelte-navigator';
     import axios from 'axios';
 
-    // let dispatch = createEventDispatcher();
 
     let registerFields = {
         email: "",
@@ -16,52 +14,6 @@
     let valid = false;
     let form = false;
 
-    /*
-    function validateForm(){
-        valid = true;
-        if (registerFields.email.trim() === "") {
-            errors.email = "Email is required";
-            valid = false;
-        } else {
-            errors.email = "";
-        }
-
-        if (registerFields.username.trim() === "") {
-            errors.username = "Username is required";
-            valid = false;
-        } else {
-            errors.username = "";
-        }
-
-        if (registerFields.password === "") {
-            errors.password = "Password is required";
-            valid = false;
-        } else {
-            errors.password = "";
-        }
-
-        if (registerFields.passwordConfirm === "") {
-            errors.passwordConfirm = "Please enter your password again";
-            valid = false;
-        } else if(registerFields.passwordConfirm !== registerFields.password) {
-            errors.password = "Passwords do not match";
-            valid = false;
-        }
-        else {
-            errors.password = "";
-        }
-
-        if (valid) {
-            // Burada kayıt yapılacak.
-            console.log("Valid form");
-            registerHandler();
-            navigate('/');
-        }
-        else {
-            console.log("Invalid form");
-        }
-      };
-      */
 
     async function registerHandler(event) {
           // Function to handle register request
@@ -73,24 +25,14 @@
                 role: "REPRESENTATIVE"
             });
 
-            // Handle the response data
-            // const { access_token } = response.data;
-            // localStorage.setItem('access_token', access_token);
 
             console.log('Sign up successful');
             navigate('/');
-            // Further processing or updating state in your Svelte component
             } catch (error) {
-            // Handle any error that occurs
             console.error(error);
-            // Optionally show an error message to the user
             }
-        
       }
       
-        
-    
-    
 
 </script>
 
@@ -113,9 +55,8 @@
   
           <div class="form-area">
           <form on:submit|preventDefault={registerHandler}>
-          <!-- <form on:submit={validateForm}> -->
 
-            <!-- Your login form fields -->
+            <!-- login form fields -->
             <div class="form-field">
               <label for="email">Email</label>
               <input type="email" id="email" bind:value={registerFields.email} placeholder="Enter your email"/>
@@ -175,13 +116,11 @@
 
     }
   
-      /* Şu an nesneler iki sütunlu. nesneleri ortala*/
       .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        /* margin: 20px auto; */
-        gap: 20px; /*iki sütun arasında ne kadar boşluk olsun istiyorsan.*/
+        gap: 20px; 
     }
 
 
@@ -192,14 +131,12 @@
     }
 
     
-    /* resmi ortala div içerisinde  */
     .right-col {
       width: 50%;
-        height: 600px; /*ekran boyutu kadar yapabilirim ileride. */
+        height: 600px;
         display: flex;
         justify-content: center;
         align-items: center;
-        /*text-align: center; /*bu yatay olarak ortaladı. */
     }
     .right-col img{
         border-radius: 10px;
@@ -216,22 +153,8 @@
     border-radius: 10px;
     padding: 20px 20px;
 }
-/*
-    .left-col {
-      
-      border: 1px solid #878787;
-      box-sizing: border-box;
-      width: 505px;
-      height: 701px;
-      left: 111px;
-      top: 114px;
-      box-shadow: 0px 4px 64px rgba(0, 0, 0, 0.05);
-      border-radius: 10px;
-  }
-  */
   
   .sign-up {
-      /* padding: 3.5px 4px; */
       margin:0;
       position: relative;
     }
@@ -261,18 +184,6 @@
     margin-top: 20px;
     }
 
-  /*
-  .user-name, .password, .password-again, .email {
-      font-size: 16px;
-      font-weight: 400;
-  }
- 
-  
-  .user-name label, .password label, .password-again label, .email label {
-      display: block;
-      margin-bottom: 3px;
-  }
-  */
   
   input[type=text], input[type=password], input[type=email] {
     width: 100%;
@@ -316,15 +227,5 @@
     color: #d91e18;
 
 }
- 
-  
-  /*logo*/
-  /*
-  .wrapper img {
-    margin-top: 30px;
-    margin-left: -220px;
-    
-  }
-  */
   
   </style>

@@ -1,58 +1,206 @@
 <script>
-    import ChatBox from '../shared/ChatBox.svelte';
-    import MessageBubble from '../shared/MessageBubble.svelte';
-	import Tabs from "../shared/Tabs.svelte";
-    import {Link, navigate} from 'svelte-navigator';
-    import ChatStore from '../stores/ChatStore.js';
-    // import {db} from '../firebase.js';
+// @ts-nocheck
+    import moment from 'moment';
+    import Tabs from "../shared/Tabs.svelte";
+    import {Link} from 'svelte-navigator';
+    import { DateInput } from 'date-picker-svelte';
+    import { onMount } from 'svelte';
+    import axios from 'axios';
 
+    let representative = {};
 
-    //bu dışarıdan gelecek bana. şimdilik default değer bu. 
-    export let representative = {
-        name: "Sam",
-        gender: "Male",
-        id:123
-    };
-    export let logout;
-    let message = "";
-  
+    let response = '';
+    let selectedChat = undefined;
+    let text="";
 
-    //representative'ın cinsiyetine göre resim değişecek.
-    let src;
-    if (representative.gender === "Female"){
-        src = "../images/customer-service-agent.png"
-    }
-    else if(representative.gender === "Male"){
-        src = "../images/customer-support-male.png";
+    let dateStart = new Date();
+    let dateEnd = new Date();
+
+    $: startTime = dateStart.toISOString();
+    $: endTime = dateEnd.toISOString();
+
+    let src = "../images/customer-service-neutral.png";
+
+    let srcCustomer1 = "../images/profile-icon.png";
+    let srcCustomer2 = "../images/profile-icon-woman.png";
+    let srcCustomer;
+
+    if(representative.id/2 === 0){
+        srcCustomer = srcCustomer2;
     }
     else{
-        src = "../images/customer-service-neutral.png";
+        srcCustomer = srcCustomer1;
     }
 
-
     //tabs, bunlara tıklayınca ilgili listeler gösterilecek. hint: mesaj listesinde okunan ve okunmayanlar.
-	let items = ["Open", "Completed"];
-	//başlarken hangisi aktif olacak?
-	let activeItem = "Open";
-	//bu propları tab componentına göndereceğiz.
+    let items = ["Open", "Completed"];
+    //başlarken hangisi aktif olacak?
+    $: activeItem = "Open";
+
+    let chats = [];
+    let endedChats = [];
+
+    let showCalendar = false;
+    const pickDate = () => {
+		showCalendar = true;
+	};
+
+    const navigateHome = () => {
+        showCalendar = false;
+    };
+
+
+
+    async function sendDate() {
+        const url = 'http://localhost:9090/representative/addtimerangetorepresentative';
+        const token = localStorage.getItem('access_token');
+        const data = {
+            "startTime": startTime,
+            "endTime": endTime,
+        };
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+                }
+        });
+
+        if (res.ok) {
+            response = await res.json();
+        } else {
+            throw new Error(res.status);
+        }
+        } catch (error) {
+        response = `An error occurred: ${error.message}`;
+        }
+    }
+
+    async function sendData() {
+        const url = 'http://localhost:9090/representative/sendmessagebyconversationid';
+        const token = localStorage.getItem('access_token');
+        const data = {
+        "id": selectedChat.id,
+        "text": text,
+        };
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+                }
+        });
+
+        if (res.ok) {
+            response = await res.json();
+            text='';
+        } else {
+            throw new Error(res.status);
+        }
+        } catch (error) {
+        response = `An error occurred: ${error.message}`;
+        }
+    }
 
 
     const tabChangeHandler = (event) => {
-		//event objesi ve detail propertysini kullanarak gönderilen data'yı alabiliriz.
+	//event objesi ve detail propertysini kullanarak gönderilen data'yı alabiliriz.
 		activeItem = event.detail;
 	};
 
+    
+    async function fetchConversations() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
 
+            const response = await axios.get('http://localhost:9090/representative/getallconversationsoftherepresentative', config);
+            chats = response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
+    onMount(fetchConversations);
+    function selectChat(id) {
+        selectedChat = chats.find(chat => chat.id === id);
+    }
 
+    async function fetchEndedConversations() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+
+            const response = await axios.get('http://localhost:9090/representative/getallendedconversationsoftherepresentative', config);
+            endedChats = response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    onMount(fetchEndedConversations);
+    function selectEndedChat(id) {
+        selectedChat = endedChats.find(chat => chat.id === id);
+    }
+
+    async function endChat(id) {
+        try{
+        const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+            const url= 'http://localhost:9090/representative/endconversationbyid/'+id;
+            const response = await axios.post(url, null, config);
+        } catch(error) {
+            console.error(error);
+        }
+        location.reload();
+    }
+
+    async function getRepresentativeInfo() {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Origin': window.location.origin
+                }
+            };
+
+            const response = await axios.get('http://localhost:9090/representative/getrepresentativeinformationbytoken', config);
+            representative = response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    onMount(getRepresentativeInfo);
 
 
 </script>
 
-<!-- bu elementlerin oturduğu beyaz pencere -->
+
 <div class="wrapper">   
     <header>
-        <Link to="/chats">
+        <Link to="/">
         <img src="../images/logo-no-background.png" alt="Orion logo" height="50px" width="auto"/>
         </Link>
         <nav class ="navbar">
@@ -60,7 +208,7 @@
                 <ul>
                     <li>
                         <Link to="/chats">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" on:click={navigateHome}>
                         <path d="M12 17.99V14.99M9.02 2.83999L3.63 7.03999C2.73 7.73999 2 9.22999 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.28999 21.19 7.73999 20.2 7.04999L14.02 2.71999C12.62 1.73999 10.37 1.78999 9.02 2.83999Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         </Link>
@@ -68,10 +216,12 @@
                     </li> 
                     
                     <li>
+                        <div class="calendar" on:click={pickDate}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="black" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M11.9949 13.7H12.0049M8.29395 13.7H8.30395M8.29395 16.7H8.30395" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                        </div>
                             
                     </li>
 
@@ -88,7 +238,7 @@
 
         <div class="account-info">
             <img {src} alt="Profile" height="40px" width="40px">
-            <p>{representative.name}</p>
+            <p>{representative.firstname}</p>
         </div>
 
     </header>
@@ -102,77 +252,114 @@
             
             <!--Burada seçilen itema göre içerik göstereceğiz.-->
             {#if activeItem === "Open"}
-                <!--buraya gönderilen liste farklı olacak sadece.-->
                 <div class="chat-boxes">
-                    <!--kaç tane varsa. sürekli güncellenecek. max kaç tane box görüntülenecek.storeda depolanabilir belki.-->
-                    <!-- bunlar chat boxlar. liste halinde sıralanır.son mesaj gönderilir sadece. -->
-                        {#each $ChatStore as message}
-                            <!-- burada customer mesajları yayınlanacak. o userIdnin üstündeki en son mesaj. -->
-                            {#if message.fromRepresentative === false}
-                                {#key message.userId}
-                                    <ChatBox chatId = {message.userId} customerName={message.username} 
-                                    date={message.date} 
-                                    message={message.message}/>
-                                {/key}
-                            {/if}
-                        {/each}
+                    <!-- <ul> -->
+                        {#each chats as chat (chat.id)}
+                            <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectChat(chat.id)}>
+                            <!-- <li> -->
+                                <img class="chat-box-pp" src={srcCustomer} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
+                                <div class="name-and-message">
+                                    <p class=name>user:{chat.externalId.slice(0,6)}</p>
+                                    <p class=message>{chat.messages.at(-1).text.substring(0,25)}...</p> <!--son gönderilen mesajın ilk 25 karakteri gösterilmeli örn. -->
+                                </div>
+                                <p class=date>{new Date(chat.messages.at(-1).time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                            </div>
+                         {/each}
                 </div>
             {:else if activeItem === "Completed"}
-                <p>Completed conversations</p>
+                <div class="chat-boxes">
+                    {#each endedChats as chat (chat.id) }
+                    <div class="chat-box {selectedChat && selectedChat.id === chat.id ? 'active' : ''}" on:click={() => selectEndedChat(chat.id)}>
+                        <img class="chat-box-pp" src={srcCustomer} alt="Profile" height="40px" width="40px">    <!--her zaman müşterinin fotosu-->
+                        <div class="name-and-message">
+                        <p class=name>user:{chat.externalId.slice(0,6)}</p>
+                        <p class=message>{chat.messages.at(-1).text.substring(0,25)}...</p> <!--son gönderilen mesajın ilk 25 karakteri gösterilmeli. -->
+                     </div>
+                    <p class=date>{new Date(chat.messages.at(-1).time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                    </div>
+                 {/each}
+                </div>
             {/if}
         </div>
-        <!--default olarak ilk chat, sonrasında chat listte hangi chate tıklandıysa o.-->
-        <div class="chat-window"> <!--sağ sütun-->
+
+
+    <div class="chat-window"> <!--sağ sütun-->
+            {#if showCalendar===true}
+            <div class="setting-work-hours">
+                <p>Başlangıç tarihi:</p>
+                <DateInput bind:value={dateStart}/>
+                <p>Bitiş tarihi:</p>
+                <DateInput bind:value={dateEnd} />
+                <button class="set-date" on:click={sendDate}>Set available work hours</button>
+            </div>
+            <div class="getting-work-hours">
+                <p>Available work hours:</p>
+                {#each representative.availableWorkHours as workHour}
+                <div class="work-hour">
+                    <p>{moment(workHour.startTime).format('YYYY-MM-DD HH:mm:ss')} - {moment(workHour.endTime).format('YYYY-MM-DD HH:mm:ss')}</p>
+                </div>
+                {/each}
+            </div>
+            {:else if selectedChat}
             <div class="chat-header">
                 <div class="profile-container">
-                    <img src="../images/profile-icon-woman.png" alt="Profile" height="40px" width="40px">  <!--bu bilgiler chat boxtan geliyor.src bilgisi de.-->
-                    <p>customerName</p>
+                    <img src={srcCustomer} alt="Profile" height="40px" width="40px"> 
+                    <p>User: {selectedChat.externalId.slice(0,6)}</p>
                 </div>
-                <p class="platform">from platform</p>   
-            </div>
-            
+                <p class="platform">from {selectedChat.platform.toLowerCase()}</p>  
+                <button class="end-chat" on:click={() => endChat(selectedChat.id)}>End chat</button> 
+            </div> 
+
+
             <div class="message-bubbles-wrapper">
-                <!-- temsilciden iletilen mesajda srcyi de göndeririz -->
-                {#each $chats as chat }
-                    {#if representative.id === chat.uid}
-                        <MessageBubble fromRepresentative = {true} messageList={chat.message} {src}/>
-                {/if}
-                {/each}
+            {#each selectedChat.messages as message (message.id)}
+                <div  class="bubble {message.direction ? 'from-rep' : 'from-cus'}">
+
+                    {#if message.direction===true}
+                        <img src={src} alt="Profile" height="40px" width="40px">
+                    {:else}
+                        <img src={srcCustomer} alt="Profile" height="40px" width="40px">
+                    {/if}
+                    <div class="messages">
+                        <p>{message.text}</p>
+                        <small>{new Date(message.time).toLocaleString()}</small>
+                    </div>
+                </div>
+            {/each}
             </div>
 
 
             <div class="msg-input-box">
-                <!-- Mesajları yazdırsın ekrana. -->
-                <input bind:value={message} type="text" placeholder="Type a message">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="send-button" on:click={sendMessage}>
+                <input bind:value={text} type="text" placeholder="Type a message">
+                <div class="send-button" on:click={sendData}>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M14.1401 0.959982L5.11012 3.95998C-0.959883 5.98998 -0.959883 9.29998 5.11012 11.32L7.79012 12.21L8.68012 14.89C10.7001 20.96 14.0201 20.96 16.0401 14.89L19.0501 5.86998C20.3901 1.81998 18.1901 -0.390018 14.1401 0.959982ZM14.4601 6.33998L10.6601 10.16C10.5101 10.31 10.3201 10.38 10.1301 10.38C9.94012 10.38 9.75012 10.31 9.60012 10.16C9.46064 10.0188 9.38242 9.82841 9.38242 9.62998C9.38242 9.43155 9.46064 9.24112 9.60012 9.09998L13.4001 5.27998C13.6901 4.98998 14.1701 4.98998 14.4601 5.27998C14.7501 5.56998 14.7501 6.04998 14.4601 6.33998Z" 
-                        fill="#7596e3"/>   
+                        fill="#7596e3"/>    
                     </svg>
                         
                 </div>
             </div>
-            
-        </div>
+            {/if}
+    </div>
     </main>
-
-
 </div>
 
-
-
-
 <style>
-    .wrapper{
+
+.wrapper{
         max-width: 1200px;
-        height: 700px; /*sonradan bu pencere boyutunu ayarla */
+        height: 700px;
         margin: 20px auto;
         padding: 20px;
         background: #f7f7f71e;
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         border-radius: 16px;
 
+    }
+
+    .message-bubbles-wrapper img{
+        border-radius: 10px;
+        margin: 5px 5px;
     }
 
     .chat-list, .chat-window{
@@ -247,10 +434,44 @@
         gap:10px;
     }
 
+
     .message-bubbles-wrapper{
         height: 400px;
         overflow-y: scroll;
-        position: relative;
+        position: relative;        
+    }
+
+    .message-bubbles-wrapper p{
+        border-radius: 12px;
+        font-size: small;
+        font-weight: 400;
+        padding: 8px 16px;
+        background: #F1F1F1;
+        color: black;
+        max-width: 300px;
+        margin-top: 8px;
+    }
+
+
+    .bubble.from-rep p{
+        background: #7596e3; 
+        color: white; 
+    }
+
+    .bubble.from-rep{
+        flex-direction: row-reverse;
+        align-content: flex-end;
+    }
+
+
+
+    .bubble{    
+        display: flex;
+        margin: 24px 0;
+    }
+
+    .messages{
+        gap: 5px;
     }
     
     .msg-input-box input{
@@ -279,6 +500,57 @@
         right: 20px;
     }
 
-        
-    
+    ul{
+        list-style-type: none;
+        margin : 0;
+        padding: 0;
+    }
+
+    li{
+        margin-bottom: 10px;
+    }
+
+
+
+    .chat-list {
+        width: 30%;
+        overflow: auto;
+        border-right: 1px solid #ddd;
+    }
+
+
+    .chat-box{
+        display: flex;
+        position: relative;
+        background: #f1f1f198;
+        border-radius: 10px;
+        padding: 0 5px;
+        font-size: small;
+    }
+
+    .date{
+        position: absolute;
+        right: 10px;
+    }
+
+    .name-and-message{
+        margin-left: 45px;
+
+    } 
+    .chat-box-pp{
+        position: absolute;
+        top: 6px;
+    }
+
+    .set-date{
+        padding: 5px 5px;
+        font-size: small;
+        margin-top: 20px;
+    }
+    .end-chat{
+        padding: 5px 5px;
+        font-size: medium;
+    }
+
+
 </style>
