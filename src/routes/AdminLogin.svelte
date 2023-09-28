@@ -1,6 +1,5 @@
 <script>
     import {Link, navigate} from 'svelte-navigator';
-    import {onMount} from 'svelte';
     import axios from 'axios';
 
 
@@ -10,14 +9,13 @@
     let errors = { username: "", password: "" };
     let valid = false;
 
-
   
 // Function to handle login request
     async function submitHandler(event) {
         try {
             const response = await axios.post('http://localhost:9090/api/v1/auth/authenticate', {
-                // email: 'representative1@hotmail.com',
-                // password: 'representative123*',
+                // email: 'admin@hotmail.com',
+                // password: 'admin123*',
                 email: email,
                 password: password
             });
@@ -27,10 +25,13 @@
             localStorage.setItem('access_token', access_token);
 
             console.log('Login successful');
-            navigate('/chats');
+            // Further processing or updating state in your Svelte component
+            navigate('/adminpanel');
 
         } catch (error) {
+            // Handle any error that occurs
             console.error(error);
+            // Optionally show an error message to the user
         }
     }
 
@@ -40,22 +41,17 @@
 
 <div class="wrapper">
     <main>
-        <div class="header">
         <Link to="/"><img
             src="../images/logo-no-background.png"
             alt="Orion logo"
             height="50px"
             width="auto"
         /></Link>
-        <Link to='/adminlogin'>
-            <div class="admin-login">Admin Login</div>
-        </Link>
-        </div>
         <div class="container">
             <div class="left-col">
                 <!-- Buraya form kutucuğu gelecek -->
                 <div class="column-box">
-                    <h2>Welcome!</h2>
+                    <h2>Admin</h2>
                     <h1>Sign in</h1>
                     <p class="slogan">Manage customer feedback simply</p>
                     <div class="form-area">
@@ -85,13 +81,7 @@
                             <button type="submit">Login</button>
                         </form>
                     </div>
-                
-                    <div class="register-link">
-                        Don't have an account?
-                        <Link to="/signup">
-                        <strong>Register here</strong>
-                        </Link>
-                    </div>
+
                 </div>
                 <!-- default olarak login. registera basılırsa register. -->
             </div>
@@ -115,19 +105,10 @@
 
 <style>
 
+/* main kullanılabilir miydi bunun yerine */
 .wrapper {
         max-width: 1200px;
         margin: 20px auto;
-    }
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-right: 120px;
-    }
-    .admin-login{
-        font-size: 20px;
-        font-weight: 500;
     }
 
     /* Şu an nesneler iki sütunlu. nesneleri ortala*/
@@ -135,12 +116,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 20px; 
+        /* margin: 20px auto; */
+        gap: 20px; /*iki sütun arasında ne kadar boşluk olsun istiyorsan.*/
     }
     /* eşit boyutta divler.  */
     .left-col,.right-col {
         width: 50%;
-        height: 600px; 
+        height: 600px; /*ekran boyutu kadar yapabilirim ileride. */
     }
 
     
@@ -149,6 +131,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        /*text-align: center; /*bu yatay olarak ortaladı. */
     }
     .right-col img{
         border-radius: 10px;
@@ -168,7 +151,7 @@
 /* welcome */
 h2 {
     font-size: 25px;
-    font-weight: 300;
+    font-weight: 500;
     margin: 0;
 }
 
@@ -204,12 +187,7 @@ h1 {
     font-weight: 300;
 }
 
-.register-link{
-    font-size: 16px;
-    font-weight: 300;
-    margin: 20px 0;
-    text-align: center;
-}
+
 
 button {
     width: 100%;
